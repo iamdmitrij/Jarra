@@ -1,0 +1,13 @@
+{
+  "name": "jarra",
+  "version": "1.0.0",
+  "description": "Next gen snake game using Phaser.",
+  "main": "main.js",
+  "author": {
+    "name": "Dmitrij",
+    "email": "dmitrij@lyre.lt"
+  },
+  "dependencies": {
+    "phaser ": "2.6.1"
+  }
+}
