@@ -1,5 +1,5 @@
 var snake, apple, squareSize, score, speed, updateDelay,
-    addNew, cursors, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value;
+    addNew, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value, obstacleX, obstacleY;
 
 var Game = {
     preload: function () {
@@ -8,9 +8,6 @@ var Game = {
     },
 
     create: function () {
-        // By setting up global variables in the create function, we initialise them on game start.
-        // We need them to be globally available so that the update function can alter them.
-
         snake = [];                     // This will work as a stack, containing the parts of our snake
         apple = {};                     // An object for the apple;
         squareSize = 50;                // The length of a side of the squares. Our image is 15x15 pixels.
@@ -18,10 +15,8 @@ var Game = {
         speed = 0;                      // Game speed.
         updateDelay = 0;                // A variable for control over update rates.
         addNew = false;                 // A variable used when an apple has been eaten.
-
+        obstacleY = 0;
         var keyboard = game.input.keyboard;
-        // Set up a Phaser controller for keyboard input.
-        cursors = game.input.keyboard.createCursorKeys();
 
         keyboard.addKey(Phaser.Keyboard.UP).onDown.add(this.movePlayerUp, this);
         keyboard.addKey(Phaser.Keyboard.DOWN).onDown.add(this.movePlayerDown, this);
@@ -107,6 +102,12 @@ var Game = {
         // Update speed value on game screen.
         speedTextValue.text = '' + speed;
 
+
+
+        this.generateObstacle(obstacleY);
+
+        obstacleY++;
+
         // Since the update function of Phaser has an update rate of around 60 FPS,
         // we need to slow that down make the game playable.
 
@@ -116,25 +117,33 @@ var Game = {
         // Do game stuff only if the counter is aliquot to (10 - the game speed).
         // The higher the speed, the more frequently this is fulfilled,
         // making the snake move faster.
-        if (updateDelay % (5000 - speed) == 0) {
+        if (updateDelay % (10 - speed) == 0) {
             // Change the last cell's coordinates relative to the head of the snake, according to the direction.
-            var firstCell = snake[snake.length - 1],
-                lastCell = snake.shift();
-            oldLastCellx = lastCell.x,
-                oldLastCelly = lastCell.y;
+            var firstCell = snake[snake.length - 1];
 
-            // End of snake movement.
 
             // Increase length of snake if an apple had been eaten.
             // Create a block in the back of the snake with the old position of the previous last block (it has moved now along with the rest of the snake).
             if (addNew) {
-                snake.unshift(game.add.sprite(oldLastCellx, oldLastCelly, 'snake'));
+                lastCell = snake.shift();
+                snake.unshift(game.add.sprite(lastCell.x, lastCell.y, 'snake'));
                 addNew = false;
             }
 
             // Check for collision with self. Parameter is the head of the snake.
             this.selfCollision(firstCell);
         }
+    },
+
+    generateObstacle: function (y) {
+        var remainder = y - 120;
+
+        while (remainder >= 0) {
+            remainder = remainder - 120;
+            game.debug.geom(new Phaser.Rectangle(0, remainder, 300, 50), 'rgba(0,0,0,1)');
+        }
+
+        game.debug.geom(new Phaser.Rectangle(0, y, 300, 50), 'rgba(0,0,0,1)');
     },
 
     generateApple: function () {
