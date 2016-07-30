@@ -1,5 +1,4 @@
-var snake, apple, squareSize, score, speed,
-    updateDelay, direction, new_direction,
+var snake, apple, squareSize, score, speed, updateDelay,
     addNew, cursors, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value;
 
 var Game = {
@@ -18,23 +17,19 @@ var Game = {
         score = 0;                      // Game score.
         speed = 0;                      // Game speed.
         updateDelay = 0;                // A variable for control over update rates.
-        direction = 0;                  // The direction of our snake.
-        new_direction = null;           // A buffer to store the new direction into.
         addNew = false;                 // A variable used when an apple has been eaten.
 
+        var keyboard = game.input.keyboard;
         // Set up a Phaser controller for keyboard input.
         cursors = game.input.keyboard.createCursorKeys();
 
-        game.input.keyboard.addKey(Phaser.Keyboard.UP).onDown.add(this.movePlayerUp, this);
-        game.input.keyboard.addKey(Phaser.Keyboard.DOWN).onDown.add(this.movePlayerDown, this);
-        game.input.keyboard.addKey(Phaser.Keyboard.LEFT).onDown.add(this.movePlayerLeft, this);
-        game.input.keyboard.addKey(Phaser.Keyboard.RIGHT).onDown.add(this.movePlayerRight, this);
+        keyboard.addKey(Phaser.Keyboard.UP).onDown.add(this.movePlayerUp, this);
+        keyboard.addKey(Phaser.Keyboard.DOWN).onDown.add(this.movePlayerDown, this);
+        keyboard.addKey(Phaser.Keyboard.LEFT).onDown.add(this.movePlayerLeft, this);
+        keyboard.addKey(Phaser.Keyboard.RIGHT).onDown.add(this.movePlayerRight, this);
         game.stage.backgroundColor = '#943E3E';
 
-        // Generate the initial snake stack. Our snake will be 10 elements long.
-        for (var i = 0; i < 1; i++) {
-            snake[i] = game.add.sprite(150 + i * squareSize, 450, 'snake');  // Parameters are (X coordinate, Y coordinate, image)
-        }
+        snake[0] = game.add.sprite(150, 450, 'snake'); // Parameters are (X coordinate, Y coordinate, image)
 
         // Genereate the first apple.
         this.generateApple();
@@ -45,7 +40,6 @@ var Game = {
 
         // Score.
         game.add.text(30, 20, "Score:", textStyle_Key);
-        //scoreTextValue = game.add.text(90, 18, score.toString(), textStyle_Value);
         scoreTextValue = game.add.text(90, 18, score.toString(), textStyle_Value);
         // Speed.
         game.add.text(500, 20, "Level:", textStyle_Key);
@@ -131,7 +125,6 @@ var Game = {
 
             // End of snake movement.
 
-
             // Increase length of snake if an apple had been eaten.
             // Create a block in the back of the snake with the old position of the previous last block (it has moved now along with the rest of the snake).
             if (addNew) {
@@ -145,7 +138,6 @@ var Game = {
     },
 
     generateApple: function () {
-
         // Chose a random place on the grid.
         // X is between 0 and 585 (39*15)
         // Y is between 0 and 435 (29*15)
@@ -177,10 +169,8 @@ var Game = {
 
                 // Refresh scoreboard.
                 scoreTextValue.text = score.toString();
-
             }
         }
-
     },
 
     selfCollision: function (head) {
@@ -193,6 +183,5 @@ var Game = {
                 game.state.start('Game_Over');
             }
         }
-
     }
 };
