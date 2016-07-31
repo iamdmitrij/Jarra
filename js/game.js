@@ -1,6 +1,9 @@
 var snake, apple, squareSize, score, speed, updateDelay,
     addNew, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value, obstacleX, obstacleY;
 
+var MAX_HEIGHT = 500;
+var MAX_WIDTH = 350;
+
 var Game = {
     preload: function () {
         game.load.image('snake', './images/snake.png');
@@ -64,7 +67,7 @@ var Game = {
     movePlayerDown: function () {
         var firstCell = snake[snake.length - 1];
 
-        if (firstCell.y + squareSize < 500) {
+        if (firstCell.y + squareSize < MAX_HEIGHT) {
             lastCell = snake.shift();
             lastCell.x = firstCell.x;
             lastCell.y = firstCell.y + squareSize;
@@ -88,7 +91,7 @@ var Game = {
     movePlayerRight: function () {
         var firstCell = snake[snake.length - 1];
 
-        if (firstCell.x + squareSize < 350) {
+        if (firstCell.x + squareSize < MAX_WIDTH) {
             lastCell = snake.shift();
             lastCell.x = firstCell.x + squareSize;
             lastCell.y = firstCell.y;
@@ -120,6 +123,7 @@ var Game = {
             var firstCell = snake[snake.length - 1];
 
             this.moveObstacles();
+            this.pushPlayer();
 
             rowCount++;
             scoreTextValue.text = rowCount.toString();
@@ -127,6 +131,7 @@ var Game = {
                 this.createNewObstacle();
             }
 
+            this.purgeObstacles();
             // Check for collision with self. Parameter is the head of the snake.
             this.selfCollision(firstCell);
         }
@@ -145,6 +150,18 @@ var Game = {
         for (var i = 0; i < obstacles.length; i++) {
             obstacles[i].y += 50;
             game.debug.geom(obstacles[i], 'rgba(0,0,0,1)');
+        }
+    },
+
+    pushPlayer: function () {
+        for (var i = 0; i < snake.length; i++) {
+            for (var j = 0; j < obstacles.length; j++) {
+                if(snake[i].x == obstacles[j].x
+                    && snake[i].y == obstacles[j].y){
+                    snake[i].y = snake[i].y + squareSize;
+                    this.movePlayer(snake[i]);
+                }
+            }
         }
     },
 
@@ -179,8 +196,15 @@ var Game = {
         }
     },
 
-    selfCollision: function (head) {
+    purgeObstacles: function () {
+        for (var i = 0; i < obstacles.length; i++) {
+            if(obstacles[i].y > MAX_HEIGHT){
+                obstacles.splice(i, 1);
+            }
+        }
+    },
 
+    selfCollision: function (head) {
         // Check if the head of the snake overlaps with any part of the snake.
         for (var i = 0; i < snake.length - 1; i++) {
             if (head.x == snake[i].x && head.y == snake[i].y) {
