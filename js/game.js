@@ -1,4 +1,4 @@
-var snake, apple, squareSize, score, speed, updateDelay,
+var player, apple, squareSize, score, speed, updateDelay,
     addNew, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value, obstacleX, obstacleY;
 
 var MAX_HEIGHT = 500;
@@ -11,7 +11,7 @@ var Game = {
     },
 
     create: function () {
-        snake = [];                     // This will work as a stack, containing the parts of our snake
+        player = [];                     // This will work as a stack, containing the parts of our snake
         apple = {};                     // An object for the apple;
         squareSize = 50;                // The length of a side of the squares. Our image is 15x15 pixels.
         score = 0;                      // Game score.
@@ -31,7 +31,7 @@ var Game = {
 
         this.createNewObstacle();
 
-        snake[0] = game.add.sprite(150, 450, 'snake'); // Parameters are (X coordinate, Y coordinate, image)
+        player[0] = game.add.sprite(150, 450, 'snake'); // Parameters are (X coordinate, Y coordinate, image)
 
         // Genereate the first apple.
         this.generateApple();
@@ -42,7 +42,7 @@ var Game = {
 
         // Score.
 
-       game.add.text(30, 20, "Score:", textStyle_Key);
+        game.add.text(30, 20, "Score:", textStyle_Key);
 
         scoreTextValue = game.add.text(90, 18, score.toString(), textStyle_Value);
 
@@ -52,11 +52,18 @@ var Game = {
 
     },
 
+    gameOver: function () {
+        game.state.start('Game_Over');
+    },
+
+    checkMoveCollision: function (cell) {
+    },
+
     movePlayerUp: function () {
-        var firstCell = snake[snake.length - 1];
+        var firstCell = player[player.length - 1];
 
         if (firstCell.y - squareSize >= 0) {
-            lastCell = snake.shift();
+            lastCell = player.shift();
             lastCell.x = firstCell.x;
             lastCell.y = firstCell.y - squareSize;
 
@@ -65,10 +72,10 @@ var Game = {
     },
 
     movePlayerDown: function () {
-        var firstCell = snake[snake.length - 1];
+        var firstCell = player[player.length - 1];
 
         if (firstCell.y + squareSize < MAX_HEIGHT) {
-            lastCell = snake.shift();
+            lastCell = player.shift();
             lastCell.x = firstCell.x;
             lastCell.y = firstCell.y + squareSize;
 
@@ -77,10 +84,10 @@ var Game = {
     },
 
     movePlayerLeft: function () {
-        var firstCell = snake[snake.length - 1];
+        var firstCell = player[player.length - 1];
 
         if (firstCell.x - squareSize >= 0) {
-            lastCell = snake.shift();
+            lastCell = player.shift();
             lastCell.x = firstCell.x - squareSize;
             lastCell.y = firstCell.y;
 
@@ -89,10 +96,10 @@ var Game = {
     },
 
     movePlayerRight: function () {
-        var firstCell = snake[snake.length - 1];
+        var firstCell = player[player.length - 1];
 
         if (firstCell.x + squareSize < MAX_WIDTH) {
-            lastCell = snake.shift();
+            lastCell = player.shift();
             lastCell.x = firstCell.x + squareSize;
             lastCell.y = firstCell.y;
 
@@ -101,7 +108,13 @@ var Game = {
     },
 
     movePlayer: function (lastCell) {
-        snake.push(lastCell);
+        for (var j = 0; j < obstacles.length; j++) {
+            if(obstacles[j].y === lastCell.y && obstacles[j].x === lastCell.x){
+                this.gameOver();
+            }
+        }
+
+        player.push(lastCell);
         this.jarCollision();
     },
 
@@ -120,7 +133,7 @@ var Game = {
         // making the snake move faster.
         if (updateDelay % (70 - speed) == 0) {
             // Change the last cell's coordinates relative to the head of the snake, according to the direction.
-            var firstCell = snake[snake.length - 1];
+            var firstCell = player[player.length - 1];
 
             this.moveObstacles();
             this.pushPlayer();
@@ -134,6 +147,7 @@ var Game = {
             this.purgeObstacles();
             // Check for collision with self. Parameter is the head of the snake.
             this.selfCollision(firstCell);
+            //this.checkCollision();
         }
     },
 
@@ -154,12 +168,15 @@ var Game = {
     },
 
     pushPlayer: function () {
-        for (var i = 0; i < snake.length; i++) {
+        for (var i = 0; i < player.length; i++) {
             for (var j = 0; j < obstacles.length; j++) {
-                if(snake[i].x == obstacles[j].x
-                    && snake[i].y == obstacles[j].y){
-                    snake[i].y = snake[i].y + squareSize;
-                    this.movePlayer(snake[i]);
+                if (player[i].y == obstacles[j].y) {
+                    player[i].y = player[i].y + squareSize;
+                    this.movePlayer(player[i]);
+                }
+
+                if (player[i].y >= MAX_HEIGHT) {
+                    this.gameOver();
                 }
             }
         }
@@ -175,8 +192,8 @@ var Game = {
     jarCollision: function () {
         // Check if any part of the snake is overlapping the apple.
         // This is needed if the apple spawns inside of the snake.
-        for (var i = 0; i < snake.length; i++) {
-            if (snake[i].x == apple.x && snake[i].y == apple.y) {
+        for (var i = 0; i < player.length; i++) {
+            if (player[i].x == apple.x && player[i].y == apple.y) {
 
                 // Next time the snake moves, a new block will be added to its length.
                 addNew = true;
@@ -198,7 +215,7 @@ var Game = {
 
     purgeObstacles: function () {
         for (var i = 0; i < obstacles.length; i++) {
-            if(obstacles[i].y > MAX_HEIGHT){
+            if (obstacles[i].y > MAX_HEIGHT) {
                 obstacles.splice(i, 1);
             }
         }
@@ -206,11 +223,11 @@ var Game = {
 
     selfCollision: function (head) {
         // Check if the head of the snake overlaps with any part of the snake.
-        for (var i = 0; i < snake.length - 1; i++) {
-            if (head.x == snake[i].x && head.y == snake[i].y) {
+        for (var i = 0; i < player.length - 1; i++) {
+            if (head.x == player[i].x && head.y == player[i].y) {
 
                 // If so, go to game over screen.
-                game.state.start('Game_Over');
+                // game.state.start('Game_Over');
             }
         }
     }
