@@ -8,6 +8,7 @@
     "email": "dmitrij@lyre.lt"
   },
   "dependencies": {
-    "phaser ": "2.6.1"
+    "phaser": "2.6.1",
+    "underscore": "1.8.3"
   }
 }

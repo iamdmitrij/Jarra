@@ -15,7 +15,9 @@ var Game = {
         speed = 0;                      // Game speed.
         updateDelay = 0;                // A variable for control over update rates.
         addNew = false;                 // A variable used when an apple has been eaten.
-        obstacleY = 0;
+        obstacle = {};
+        obstacles = [];
+        rowCount = 0;
         var keyboard = game.input.keyboard;
 
         keyboard.addKey(Phaser.Keyboard.UP).onDown.add(this.movePlayerUp, this);
@@ -23,6 +25,8 @@ var Game = {
         keyboard.addKey(Phaser.Keyboard.LEFT).onDown.add(this.movePlayerLeft, this);
         keyboard.addKey(Phaser.Keyboard.RIGHT).onDown.add(this.movePlayerRight, this);
         game.stage.backgroundColor = '#943E3E';
+
+        this.createNewObstacle();
 
         snake[0] = game.add.sprite(150, 450, 'snake'); // Parameters are (X coordinate, Y coordinate, image)
 
@@ -34,8 +38,11 @@ var Game = {
         textStyle_Value = {font: "bold 18px sans-serif", fill: "#F0F0F0", align: "center"};
 
         // Score.
-        game.add.text(30, 20, "Score:", textStyle_Key);
+
+       game.add.text(30, 20, "Score:", textStyle_Key);
+
         scoreTextValue = game.add.text(90, 18, score.toString(), textStyle_Value);
+
         // Speed.
         game.add.text(500, 20, "Level:", textStyle_Key);
         speedTextValue = game.add.text(558, 18, speed.toString(), textStyle_Value);
@@ -81,7 +88,7 @@ var Game = {
     movePlayerRight: function () {
         var firstCell = snake[snake.length - 1];
 
-        if (firstCell.x + squareSize < 300) {
+        if (firstCell.x + squareSize < 350) {
             lastCell = snake.shift();
             lastCell.x = firstCell.x + squareSize;
             lastCell.y = firstCell.y;
@@ -102,32 +109,22 @@ var Game = {
         // Update speed value on game screen.
         speedTextValue.text = '' + speed;
 
-
-
-        this.generateObstacle(obstacleY);
-
-        obstacleY++;
-
-        // Since the update function of Phaser has an update rate of around 60 FPS,
-        // we need to slow that down make the game playable.
-
         // Increase a counter on every update call.
         updateDelay++;
 
         // Do game stuff only if the counter is aliquot to (10 - the game speed).
         // The higher the speed, the more frequently this is fulfilled,
         // making the snake move faster.
-        if (updateDelay % (10 - speed) == 0) {
+        if (updateDelay % (70 - speed) == 0) {
             // Change the last cell's coordinates relative to the head of the snake, according to the direction.
             var firstCell = snake[snake.length - 1];
 
+            this.moveObstacles();
 
-            // Increase length of snake if an apple had been eaten.
-            // Create a block in the back of the snake with the old position of the previous last block (it has moved now along with the rest of the snake).
-            if (addNew) {
-                lastCell = snake.shift();
-                snake.unshift(game.add.sprite(lastCell.x, lastCell.y, 'snake'));
-                addNew = false;
+            rowCount++;
+            scoreTextValue.text = rowCount.toString();
+            if (rowCount % 3 == 0) {
+                this.createNewObstacle();
             }
 
             // Check for collision with self. Parameter is the head of the snake.
@@ -135,26 +132,26 @@ var Game = {
         }
     },
 
-    generateObstacle: function (y) {
-        var remainder = y - 120;
+    createNewObstacle: function () {
+        var rand1 = Math.floor(Math.random() * (4 - 0 + 1)) + 0;
+        var rand2 = Math.floor(Math.random() * (2 - 0 + 1)) + 1;
 
-        while (remainder >= 0) {
-            remainder = remainder - 120;
-            game.debug.geom(new Phaser.Rectangle(0, remainder, 300, 50), 'rgba(0,0,0,1)');
+        var obstacle = new Phaser.Rectangle(rand1 * 50, -50, (rand1 + rand2) * 50, 50);
+        game.world.sendToBack(obstacle);
+        obstacles.push(obstacle);
+    },
+
+    moveObstacles: function () {
+        for (var i = 0; i < obstacles.length; i++) {
+            obstacles[i].y += 50;
+            game.debug.geom(obstacles[i], 'rgba(0,0,0,1)');
         }
-
-        game.debug.geom(new Phaser.Rectangle(0, y, 300, 50), 'rgba(0,0,0,1)');
     },
 
     generateApple: function () {
-        // Chose a random place on the grid.
-        // X is between 0 and 585 (39*15)
-        // Y is between 0 and 435 (29*15)
-
         var randomX = Math.floor(Math.random() * 40) * squareSize,
             randomY = Math.floor(Math.random() * 30) * squareSize;
 
-        // Add a new apple.
         apple = game.add.sprite(randomX, randomY, 'apple');
     },
 
