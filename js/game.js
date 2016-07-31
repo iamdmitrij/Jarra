@@ -42,13 +42,13 @@ var Game = {
 
         // Score.
 
-        game.add.text(30, 20, "Score:", textStyle_Key);
+        game.add.text(10, 20, "Score:", textStyle_Key);
 
-        scoreTextValue = game.add.text(90, 18, score.toString(), textStyle_Value);
+        scoreTextValue = game.add.text(70, 18, score.toString(), textStyle_Value);
 
         // Speed.
-        game.add.text(500, 20, "Level:", textStyle_Key);
-        speedTextValue = game.add.text(558, 18, speed.toString(), textStyle_Value);
+        game.add.text(MAX_WIDTH - 90, 20, "Level:", textStyle_Key);
+        speedTextValue = game.add.text(MAX_WIDTH - 30, 18, speed.toString(), textStyle_Value);
 
     },
 
@@ -170,12 +170,18 @@ var Game = {
     pushPlayer: function () {
         for (var i = 0; i < player.length; i++) {
             for (var j = 0; j < obstacles.length; j++) {
-                if (player[i].y == obstacles[j].y) {
+                if (player[i].y == obstacles[j].y
+                    && obstacles[j].topLeft.x <= player[i].x
+                    && obstacles[j].topRight.x > player[i].x
+                )
+                {
                     player[i].y = player[i].y + squareSize;
                     this.movePlayer(player[i]);
                 }
 
-                if (player[i].y >= MAX_HEIGHT) {
+                if (player[i].y >= MAX_HEIGHT
+                    && obstacles[j].topLeft.x < player[i].x
+                    && obstacles[j].topRight.x > player[i].x) {
                     this.gameOver();
                 }
             }
