@@ -56,9 +56,6 @@ var Game = {
         game.state.start('Game_Over');
     },
 
-    checkMoveCollision: function (cell) {
-    },
-
     movePlayerUp: function () {
         var firstCell = player[player.length - 1];
 
@@ -118,6 +115,7 @@ var Game = {
 
         player.push(lastCell);
         this.jarCollision();
+        this.wallCollision(lastCell);
     },
 
     update: function () {
@@ -149,7 +147,7 @@ var Game = {
             this.purgeObstacles();
             // Check for collision with self. Parameter is the head of the snake.
             this.selfCollision(firstCell);
-            //this.checkCollision();
+            this.wallCollision(firstCell);
         }
     },
 
@@ -191,8 +189,8 @@ var Game = {
     },
 
     generateApple: function () {
-        var randomX = Math.floor(Math.random() * 40) * squareSize,
-            randomY = Math.floor(Math.random() * 30) * squareSize;
+        var randomX = Math.floor(Math.random() * 7) * squareSize,
+            randomY = Math.floor(Math.random() * 10) * squareSize;
 
         apple = game.add.sprite(randomX, randomY, 'apple');
     },
@@ -217,6 +215,9 @@ var Game = {
 
                 // Refresh scoreboard.
                 scoreTextValue.text = score.toString();
+
+                player.unshift(game.add.sprite(player[i].x, player[i].y, 'snake'));
+
             }
         }
     },
@@ -237,6 +238,12 @@ var Game = {
                 // If so, go to game over screen.
                 // game.state.start('Game_Over');
             }
+        }
+    },
+
+    wallCollision: function(head) {
+        if(head.x >= MAX_WIDTH || head.x < 0 || head.y >= MAX_HEIGHT || head.y < 0){
+            this.gameOver();
         }
     }
 };
