@@ -109,7 +109,9 @@ var Game = {
 
     movePlayer: function (lastCell) {
         for (var j = 0; j < obstacles.length; j++) {
-            if(obstacles[j].y === lastCell.y && obstacles[j].x === lastCell.x){
+            if(obstacles[j].y === lastCell.y
+                && obstacles[j].topLeft.x <= lastCell.x
+                && obstacles[j].topRight.x >= lastCell.x){
                 this.gameOver();
             }
         }
