@@ -1,5 +1,5 @@
 var player, apple, squareSize, score, speed, updateDelay,
-    addNew, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value, obstacleX, obstacleY;
+    addNew, scoreTextValue, speedTextValue, textStyle_Key, textStyle_Value;
 
 var MAX_HEIGHT = 500;
 var MAX_WIDTH = 350;
@@ -7,7 +7,7 @@ var MAX_WIDTH = 350;
 var Game = {
     preload: function () {
         game.load.image('snake', './images/snake.png');
-        game.load.image('apple', './images/star.png');
+        game.load.image('jar', './images/star.png');
     },
 
     create: function () {
@@ -168,6 +168,7 @@ var Game = {
     },
 
     pushPlayer: function () {
+        var moveEntirePlayer = false;
         for (var i = 0; i < player.length; i++) {
             for (var j = 0; j < obstacles.length; j++) {
                 if (player[i].y == obstacles[j].y
@@ -175,16 +176,27 @@ var Game = {
                     && obstacles[j].topRight.x > player[i].x
                 )
                 {
-                    player[i].y = player[i].y + squareSize;
-                    this.movePlayer(player[i]);
+                    moveEntirePlayer = true;
+                    break;
                 }
+
+            }
+        }
+
+        var playerInitLength = player.length;
+        for (var i = 0; i < playerInitLength; i++) {
+
+            if(moveEntirePlayer){
+
+                player[i].y = player[i].y + squareSize;
+                this.movePlayer(player[i]);
+            }
 
                 if (player[i].y >= MAX_HEIGHT
                     && obstacles[j].topLeft.x < player[i].x
                     && obstacles[j].topRight.x > player[i].x) {
                     this.gameOver();
                 }
-            }
         }
     },
 
@@ -192,7 +204,7 @@ var Game = {
         var randomX = Math.floor(Math.random() * 7) * squareSize,
             randomY = Math.floor(Math.random() * 10) * squareSize;
 
-        apple = game.add.sprite(randomX, randomY, 'apple');
+        apple = game.add.sprite(randomX, randomY, 'jar');
     },
 
     jarCollision: function () {
